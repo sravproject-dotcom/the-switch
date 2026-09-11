@@ -106,6 +106,7 @@ export function useProgress() {
  */
 export function useDailyLogs() {
   const [logs, setLogs] = useState(() => readLocal(LOCAL_LOGS_KEY, {}))
+  const [syncState, setSyncState] = useState(isSupabaseConfigured ? 'syncing' : 'offline')
 
   useEffect(() => {
     if (!isSupabaseConfigured) return
@@ -114,7 +115,12 @@ export function useDailyLogs() {
       .from('daily_logs')
       .select('log_date, coding_minutes, debugging_minutes, notes')
       .then(({ data, error }) => {
-        if (cancelled || error) return
+        if (cancelled) return
+        if (error) {
+          console.error('Supabase daily log load error', error)
+          setSyncState('error')
+          return
+        }
         const merged = { ...readLocal(LOCAL_LOGS_KEY, {}) }
         for (const row of data || []) {
           merged[row.log_date] = {
@@ -125,6 +131,7 @@ export function useDailyLogs() {
         }
         setLogs(merged)
         writeLocal(LOCAL_LOGS_KEY, merged)
+        setSyncState('synced')
       })
     return () => {
       cancelled = true
@@ -151,7 +158,12 @@ export function useDailyLogs() {
           { onConflict: 'log_date' }
         )
         .then(({ error }) => {
-          if (error) console.error('Supabase save error', error)
+          if (error) {
+            console.error('Supabase daily log save error', error)
+            setSyncState('error')
+          } else {
+            setSyncState('synced')
+          }
         })
     }
   }, [])
@@ -166,7 +178,7 @@ export function useDailyLogs() {
     }
   }, [])
 
-  return { logs, saveDay, reset }
+  return { logs, saveDay, reset, syncState }
 }
 
 export function usePlanStart() {

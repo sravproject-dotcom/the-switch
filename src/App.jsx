@@ -16,7 +16,7 @@ export default function App() {
   const [unlocked, setUnlocked] = useState(isUnlocked())
   const [tab, setTab] = useState('overview')
   const { progress, toggle, update, reset: resetProgress, syncState } = useProgress()
-  const { logs, saveDay, reset: resetLogs } = useDailyLogs()
+  const { logs, saveDay, reset: resetLogs, syncState: logsSyncState } = useDailyLogs()
   const { planStart, setPlanStart } = usePlanStart()
 
   function applyAssistantAction(action) {
@@ -29,6 +29,14 @@ export default function App() {
       update(action.itemId, { done: Boolean(action.done) })
     } else if (action.type === 'set_plan_start' && /^\d{4}-\d{2}-\d{2}$/.test(action.date)) {
       setPlanStart(action.date)
+    } else if (action.type === 'log_day' && /^\d{4}-\d{2}-\d{2}$/.test(action.date)) {
+      saveDay(action.date, {
+        coding: Math.max(0, Number(action.coding) || 0),
+        debugging: Math.max(0, Number(action.debugging) || 0),
+        notes: typeof action.notes === 'string' ? action.notes : '',
+      })
+    } else if (action.type === 'navigate' && ['overview', 'roadmap', 'daily', 'theory', 'systemdesign', 'stories', 'positioning'].includes(action.tab)) {
+      setTab(action.tab)
     }
   }
 
@@ -37,7 +45,7 @@ export default function App() {
   }
 
   return (
-    <Layout active={tab} onChange={setTab} syncState={syncState}>
+    <Layout active={tab} onChange={setTab} syncState={syncState === 'error' || logsSyncState === 'error' ? 'error' : syncState === 'syncing' || logsSyncState === 'syncing' ? 'syncing' : syncState}>
       {tab === 'overview' && <Overview progress={progress} logs={logs} onNavigate={setTab} />}
       {tab === 'roadmap' && <Roadmap progress={progress} toggle={toggle} update={update} />}
       {tab === 'daily' && <DailyTracker logs={logs} saveDay={saveDay} />}

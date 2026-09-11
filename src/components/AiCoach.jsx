@@ -15,13 +15,24 @@ export default function AiCoach({ progress, logs, planStart, roadmap, onAction }
     setMessages((current) => [...current, { role: 'user', text: trimmed }])
     setBusy(true)
     try {
+      const history = messages
+        .filter((item) => item.role === 'user' || item.role === 'assistant')
+        .slice(-15)
+        .map((item) => ({ role: item.role, content: item.text }))
       const response = await fetch('/api/assistant', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ message: trimmed, context: { progress, dailyLogs: logs, planStart, roadmap } }),
+        body: JSON.stringify({ message: trimmed, history, context: { progress, dailyLogs: logs, planStart, roadmap } }),
       })
-      const data = await response.json()
+      const raw = await response.text()
+      let data
+      try {
+        data = raw ? JSON.parse(raw) : {}
+      } catch {
+        throw new Error(`Assistant route returned a non-JSON response (${response.status}). Deploy the API function with the app.`)
+      }
       if (!response.ok) throw new Error(data.error || 'Assistant unavailable')
+      if (!data.reply) throw new Error('Assistant returned no reply.')
       setMessages((current) => [...current, { role: 'assistant', text: data.reply }])
       if (data.action) onAction(data.action)
     } catch (error) {
