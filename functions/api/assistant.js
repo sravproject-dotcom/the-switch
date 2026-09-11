@@ -43,6 +43,7 @@ If the user says “next week”, calculate the next Monday from the supplied to
     progress: body.context?.progress || {},
     dailyLogs: body.context?.dailyLogs || {},
     planStart: body.context?.planStart || null,
+    roadmap: body.context?.roadmap || [],
   })
 
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {

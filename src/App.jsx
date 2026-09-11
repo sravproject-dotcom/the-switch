@@ -9,6 +9,7 @@ import SystemDesignPractice from './components/SystemDesignPractice'
 import StoryBank from './components/StoryBank'
 import Positioning from './components/Positioning'
 import AiCoach from './components/AiCoach'
+import { weeks } from './data/seed'
 import { useProgress, useDailyLogs, usePlanStart } from './lib/store'
 
 export default function App() {
@@ -46,7 +47,7 @@ export default function App() {
       )}
       {tab === 'stories' && <StoryBank progress={progress} toggle={toggle} update={update} />}
       {tab === 'positioning' && <Positioning />}
-      <AiCoach progress={progress} logs={logs} planStart={planStart} onAction={applyAssistantAction} />
+      <AiCoach progress={progress} logs={logs} planStart={planStart} roadmap={weeks} onAction={applyAssistantAction} />
     </Layout>
   )
 }

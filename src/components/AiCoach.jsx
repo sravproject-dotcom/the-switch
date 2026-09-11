@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Bot, Send, Sparkles, X } from 'lucide-react'
 
-export default function AiCoach({ progress, logs, planStart, onAction }) {
+export default function AiCoach({ progress, logs, planStart, roadmap, onAction }) {
   const [open, setOpen] = useState(false)
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState([])
@@ -18,7 +18,7 @@ export default function AiCoach({ progress, logs, planStart, onAction }) {
       const response = await fetch('/api/assistant', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ message: trimmed, context: { progress, dailyLogs: logs, planStart } }),
+        body: JSON.stringify({ message: trimmed, context: { progress, dailyLogs: logs, planStart, roadmap } }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Assistant unavailable')

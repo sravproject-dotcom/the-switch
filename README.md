@@ -10,6 +10,11 @@ Progress is saved to Supabase when it's configured, and always cached in
 the browser too, so the app keeps working even if Supabase is briefly
 unreachable.
 
+The built-in AI coach runs through a Cloudflare Pages Function. It receives
+the current roadmap, checklist state, and daily logs, then returns a response
+plus a small validated action (mark a task, reset all data, or set a new plan
+start date). API keys stay server-side and are selected round-robin.
+
 ## 1. Run it locally
 
 ```bash
@@ -32,7 +37,26 @@ npm run dev
    everything to `localStorage` on whichever device you're using instead of
    syncing across devices.
 
-## 3. About the lock
+## 3. Configure the AI coach and reports
+
+Add these as Cloudflare Pages environment variables, not `VITE_` variables:
+
+```text
+AI_API_KEY_1=...
+AI_API_KEY_2=...
+AI_API_KEY_3=...
+SENDER_MAIL=...
+MAIL_PASSWORD=...
+RECIVER_MAIL=...
+```
+
+Any number of `AI_API_KEY_<number>` values is supported. The assistant is
+available at `/api/assistant`. A report payload can be prepared at
+`/api/weekly-report`; connect that endpoint to your SMTP provider's scheduled
+job (or Cloudflare Cron + an SMTP relay) to deliver the weekly email. The
+three mail variables are deliberately never sent to the browser.
+
+## 4. About the lock
 
 The passphrase screen checks what you type against a SHA-256 hash, not a
 plaintext password, so the phrase itself isn't sitting in the shipped code.
@@ -64,7 +88,7 @@ node -e "crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourNewPhrase
 
 (or, in Python: `python3 -c "import hashlib; print(hashlib.sha256(b'yourNewPhrase').hexdigest())"`)
 
-## 4. Deploy to Cloudflare Pages
+## 5. Deploy to Cloudflare Pages
 
 1. Push this project to a GitHub/GitLab repo.
 2. In the Cloudflare dashboard: Workers & Pages → Create → Pages → connect
@@ -86,7 +110,7 @@ npm run build
 npx wrangler pages deploy dist --project-name the-switch
 ```
 
-## 5. Editing the roadmap content
+## 6. Editing the roadmap content
 
 All of the curriculum content — the 12 weeks, theory topics, system-design
 prompts, and story titles — lives in `src/data/seed.js` as plain data. Edit
