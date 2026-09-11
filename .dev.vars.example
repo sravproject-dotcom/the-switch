@@ -1,0 +1,34 @@
+# Copy this to .dev.vars for local `npm run worker:dev`, and set the same
+# names as real secrets in Cloudflare for production (see README section 6).
+# .dev.vars is gitignored — never commit real values.
+
+# --- Groq ---
+# Add as many as you want, numbered from 1. The Worker round-robins across
+# all of them and fails over automatically if one is rate-limited.
+GROQ_API_KEY_1=
+GROQ_API_KEY_2=
+
+# --- Supabase (server-side; different from the VITE_ ones used by the frontend) ---
+# Same project URL as VITE_SUPABASE_URL. The service-role key is in
+# Supabase → Project Settings → API → service_role — NEVER put this in a
+# VITE_ variable or anywhere the browser bundle can see it.
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# --- Gmail SMTP, for the weekly report ---
+# MAIL_PASSWORD must be a 16-character Gmail "App Password", not your normal
+# Gmail password — generate one at https://myaccount.google.com/apppasswords
+# (requires 2-Step Verification to be turned on).
+SENDER_MAIL=
+MAIL_PASSWORD=
+RECEIVER_MAIL=
+
+# --- Soft auth for /api/chat ---
+# Same SHA-256 hex hash already hardcoded as PASSPHRASE_HASH in
+# src/components/PasswordGate.jsx. Reusing the same phrase means the chat
+# widget can authenticate itself automatically right after you unlock the
+# app; leave unset to disable the check entirely (not recommended). It's
+# not a secret (it's already shipped in the public JS bundle), so the
+# current value is filled in below — update it if you ever change the
+# passphrase in PasswordGate.jsx.
+APP_PASSPHRASE_HASH=12a52a1b4232f255691ea33ea27fab89d3290e18a4e301310d295819d1ce7714
