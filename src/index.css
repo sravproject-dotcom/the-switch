@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #F7F2E7;
+  background-image:
+    radial-gradient(circle at 8% 12%, rgba(63, 107, 79, 0.06), transparent 40%),
+    radial-gradient(circle at 92% 85%, rgba(224, 149, 79, 0.08), transparent 45%);
+  color: #26301F;
+  font-family: 'Nunito Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #EAB25C;
+  color: #1E3327;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D9E5CC;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9DBB88;
+}
+
+:focus-visible {
+  outline: 3px solid #E0954F;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.font-display {
+  font-family: 'Fraunces', serif;
+}
+
+/* hand-drawn wobble border used sparingly for the single "bold" accent moment */
+.wobble {
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+}
