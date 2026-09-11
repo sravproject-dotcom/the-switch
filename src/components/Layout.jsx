@@ -57,6 +57,7 @@ function SyncBadge({ state }) {
     syncing: { text: 'Syncing…', dot: 'bg-honey-500 animate-pulse' },
     offline: { text: 'Saved on this device', dot: 'bg-sky-500' },
     error: { text: 'Sync issue — saved locally', dot: 'bg-berry-500' },
+    setup: { text: 'Supabase setup needed — saved locally', dot: 'bg-honey-500' },
   }
   const cfg = map[state] || map.offline
   return (

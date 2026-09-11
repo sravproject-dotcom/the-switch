@@ -6,8 +6,9 @@ function json(body, status = 200) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!env.SENDER_MAIL || !env.MAIL_PASSWORD || !env.RECIVER_MAIL) {
-    return json({ error: 'SENDER_MAIL, MAIL_PASSWORD, and RECIVER_MAIL must be configured.' }, 503)
+  const receiverMail = env.RECEIVER_MAIL || env.RECIVER_MAIL
+  if (!env.SENDER_MAIL || !env.MAIL_PASSWORD || !receiverMail) {
+    return json({ error: 'SENDER_MAIL, MAIL_PASSWORD, and RECEIVER_MAIL must be configured.' }, 503)
   }
 
   const body = await request.json()
@@ -23,5 +24,5 @@ export async function onRequestPost({ request, env }) {
 
   // SMTP delivery is intentionally isolated behind this endpoint. Configure a
   // mail provider webhook/worker for production; credentials never enter the browser.
-  return json({ queued: false, subject, text, recipient: env.RECIVER_MAIL, message: 'Report payload prepared. Connect this endpoint to your SMTP provider.' }, 501)
+  return json({ queued: false, subject, text, recipient: receiverMail, message: 'Report payload prepared. Connect this endpoint to your SMTP provider.' }, 501)
 }

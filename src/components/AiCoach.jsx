@@ -34,7 +34,10 @@ export default function AiCoach({ progress, logs, planStart, roadmap, onAction }
       if (!response.ok) throw new Error(data.error || 'Assistant unavailable')
       if (!data.reply) throw new Error('Assistant returned no reply.')
       setMessages((current) => [...current, { role: 'assistant', text: data.reply }])
-      if (data.action) onAction(data.action)
+      if (data.action) {
+        const actionMessage = await onAction(data.action)
+        if (actionMessage) setMessages((current) => [...current, { role: 'assistant', text: actionMessage }])
+      }
     } catch (error) {
       setMessages((current) => [...current, { role: 'assistant', text: error.message }])
     } finally {

@@ -19,7 +19,7 @@ export default function App() {
   const { logs, saveDay, reset: resetLogs, syncState: logsSyncState } = useDailyLogs()
   const { planStart, setPlanStart } = usePlanStart()
 
-  function applyAssistantAction(action) {
+  async function applyAssistantAction(action) {
     if (!action) return
     if (action.type === 'reset_all') {
       resetProgress()
@@ -37,6 +37,15 @@ export default function App() {
       })
     } else if (action.type === 'navigate' && ['overview', 'roadmap', 'daily', 'theory', 'systemdesign', 'stories', 'positioning'].includes(action.tab)) {
       setTab(action.tab)
+    } else if (action.type === 'send_reminder') {
+      const response = await fetch('/api/email', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ subject: action.subject, text: action.body }),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Reminder could not be sent.')
+      return result.message
     }
   }
 
@@ -45,7 +54,7 @@ export default function App() {
   }
 
   return (
-    <Layout active={tab} onChange={setTab} syncState={syncState === 'error' || logsSyncState === 'error' ? 'error' : syncState === 'syncing' || logsSyncState === 'syncing' ? 'syncing' : syncState}>
+    <Layout active={tab} onChange={setTab} syncState={syncState === 'error' || logsSyncState === 'error' ? 'error' : syncState === 'setup' || logsSyncState === 'setup' ? 'setup' : syncState === 'syncing' || logsSyncState === 'syncing' ? 'syncing' : syncState}>
       {tab === 'overview' && <Overview progress={progress} logs={logs} onNavigate={setTab} />}
       {tab === 'roadmap' && <Roadmap progress={progress} toggle={toggle} update={update} />}
       {tab === 'daily' && <DailyTracker logs={logs} saveDay={saveDay} />}

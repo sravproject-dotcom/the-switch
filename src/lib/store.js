@@ -41,13 +41,20 @@ export function useProgress() {
         if (cancelled) return
         if (error) {
           console.error('Supabase load error', error)
-          setSyncState('error')
+          setSyncState(error.code === '42P01' ? 'setup' : 'error')
           return
         }
         const merged = { ...readLocal(LOCAL_KEY, {}) }
         for (const row of data || []) {
           merged[row.item_id] = { done: row.done, notes: row.notes || '' }
         }
+        const remoteIds = new Set((data || []).map((row) => row.item_id))
+        const localRows = Object.entries(readLocal(LOCAL_KEY, {}))
+          .filter(([itemId]) => !remoteIds.has(itemId))
+          .map(([itemId, value]) => ({ item_id: itemId, done: Boolean(value.done), notes: value.notes || '', updated_at: new Date().toISOString() }))
+        if (localRows.length) supabase.from('progress').upsert(localRows, { onConflict: 'item_id' }).then(({ error: saveError }) => {
+          if (saveError) console.error('Supabase progress migration error', saveError)
+        })
         setProgress(merged)
         writeLocal(LOCAL_KEY, merged)
         setSyncState('synced')
@@ -118,7 +125,7 @@ export function useDailyLogs() {
         if (cancelled) return
         if (error) {
           console.error('Supabase daily log load error', error)
-          setSyncState('error')
+          setSyncState(error.code === '42P01' ? 'setup' : 'error')
           return
         }
         const merged = { ...readLocal(LOCAL_LOGS_KEY, {}) }
@@ -129,6 +136,13 @@ export function useDailyLogs() {
             notes: row.notes || '',
           }
         }
+        const remoteDates = new Set((data || []).map((row) => row.log_date))
+        const localRows = Object.entries(readLocal(LOCAL_LOGS_KEY, {}))
+          .filter(([date]) => !remoteDates.has(date))
+          .map(([date, value]) => ({ log_date: date, coding_minutes: value.coding || 0, debugging_minutes: value.debugging || 0, notes: value.notes || '', updated_at: new Date().toISOString() }))
+        if (localRows.length) supabase.from('daily_logs').upsert(localRows, { onConflict: 'log_date' }).then(({ error: saveError }) => {
+          if (saveError) console.error('Supabase daily log migration error', saveError)
+        })
         setLogs(merged)
         writeLocal(LOCAL_LOGS_KEY, merged)
         setSyncState('synced')
