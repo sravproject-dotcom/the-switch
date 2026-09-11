@@ -3,6 +3,7 @@ import { supabase, isSupabaseConfigured } from './supabaseClient'
 
 const LOCAL_KEY = 'switch_progress_v1'
 const LOCAL_LOGS_KEY = 'switch_daily_logs_v1'
+const PLAN_START_KEY = 'switch_plan_start_v1'
 
 function readLocal(key, fallback) {
   try {
@@ -87,7 +88,17 @@ export function useProgress() {
     [progress, update]
   )
 
-  return { progress, toggle, update, syncState }
+  const reset = useCallback(() => {
+    setProgress({})
+    writeLocal(LOCAL_KEY, {})
+    if (isSupabaseConfigured) {
+      supabase.from('progress').delete().neq('item_id', '').then(({ error }) => {
+        if (error) console.error('Supabase reset error', error)
+      })
+    }
+  }, [])
+
+  return { progress, toggle, update, reset, syncState }
 }
 
 /**
@@ -145,5 +156,24 @@ export function useDailyLogs() {
     }
   }, [])
 
-  return { logs, saveDay }
+  const reset = useCallback(() => {
+    setLogs({})
+    writeLocal(LOCAL_LOGS_KEY, {})
+    if (isSupabaseConfigured) {
+      supabase.from('daily_logs').delete().neq('log_date', '1900-01-01').then(({ error }) => {
+        if (error) console.error('Supabase log reset error', error)
+      })
+    }
+  }, [])
+
+  return { logs, saveDay, reset }
+}
+
+export function usePlanStart() {
+  const [planStart, setPlanStartState] = useState(() => readLocal(PLAN_START_KEY, ''))
+  const setPlanStart = useCallback((date) => {
+    setPlanStartState(date)
+    writeLocal(PLAN_START_KEY, date)
+  }, [])
+  return { planStart, setPlanStart }
 }

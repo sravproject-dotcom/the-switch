@@ -8,13 +8,28 @@ import TheoryChecklist from './components/TheoryChecklist'
 import SystemDesignPractice from './components/SystemDesignPractice'
 import StoryBank from './components/StoryBank'
 import Positioning from './components/Positioning'
-import { useProgress, useDailyLogs } from './lib/store'
+import AiCoach from './components/AiCoach'
+import { useProgress, useDailyLogs, usePlanStart } from './lib/store'
 
 export default function App() {
   const [unlocked, setUnlocked] = useState(isUnlocked())
   const [tab, setTab] = useState('overview')
-  const { progress, toggle, update, syncState } = useProgress()
-  const { logs, saveDay } = useDailyLogs()
+  const { progress, toggle, update, reset: resetProgress, syncState } = useProgress()
+  const { logs, saveDay, reset: resetLogs } = useDailyLogs()
+  const { planStart, setPlanStart } = usePlanStart()
+
+  function applyAssistantAction(action) {
+    if (!action) return
+    if (action.type === 'reset_all') {
+      resetProgress()
+      resetLogs()
+      setPlanStart('')
+    } else if (action.type === 'mark_task' && typeof action.itemId === 'string') {
+      update(action.itemId, { done: Boolean(action.done) })
+    } else if (action.type === 'set_plan_start' && /^\d{4}-\d{2}-\d{2}$/.test(action.date)) {
+      setPlanStart(action.date)
+    }
+  }
 
   if (!unlocked) {
     return <PasswordGate onUnlock={() => setUnlocked(true)} />
@@ -31,6 +46,7 @@ export default function App() {
       )}
       {tab === 'stories' && <StoryBank progress={progress} toggle={toggle} update={update} />}
       {tab === 'positioning' && <Positioning />}
+      <AiCoach progress={progress} logs={logs} planStart={planStart} onAction={applyAssistantAction} />
     </Layout>
   )
 }
