@@ -46,6 +46,15 @@ export default function App() {
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Reminder could not be sent.')
       return result.message
+    } else if (action.type === 'schedule_daily_email') {
+      const response = await fetch('/api/schedule-email', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ time: action.time, subject: action.subject, body: action.body }),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Daily reminder could not be scheduled.')
+      return result.message
     }
   }
 

@@ -6,7 +6,7 @@ function localApiPlugin(env) {
     name: 'local-pages-api',
     configureServer(server) {
       server.middlewares.use(async (request, response, next) => {
-        const functionName = request.url === '/api/assistant' ? 'assistant' : request.url === '/api/email' ? 'email' : null
+        const functionName = request.url === '/api/assistant' ? 'assistant' : request.url === '/api/email' ? 'email' : request.url === '/api/schedule-email' ? 'schedule-email' : request.url === '/api/send-daily-email' ? 'send-daily-email' : null
         if (!functionName) return next()
         if (request.method !== 'POST') {
           response.statusCode = 405

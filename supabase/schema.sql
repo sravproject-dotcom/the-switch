@@ -17,6 +17,15 @@ create table if not exists daily_logs (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists email_schedules (
+  id text primary key,
+  time text not null,
+  subject text not null default 'Your daily Switch reminder',
+  body text not null default 'Make one small step on your next task today.',
+  enabled boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
 -- Row Level Security: this is a single-user personal tracker, gated by the
 -- passphrase screen in the app itself rather than per-row Supabase auth.
 -- The policies below let the anon key (the one in your .env) read and write
@@ -30,3 +39,5 @@ create policy "anon full access" on progress
 
 create policy "anon full access" on daily_logs
   for all using (true) with check (true);
+
+alter table email_schedules enable row level security;

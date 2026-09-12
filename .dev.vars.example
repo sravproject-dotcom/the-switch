@@ -23,6 +23,7 @@ SENDER_MAIL=
 MAIL_PASSWORD=
 RECEIVER_MAIL=
 RESEND_API_KEY=
+CRON_SECRET=
 
 # --- Soft auth for /api/chat ---
 # Same SHA-256 hex hash already hardcoded as PASSPHRASE_HASH in
